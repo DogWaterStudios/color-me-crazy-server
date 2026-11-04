@@ -1,0 +1,22 @@
+# A Color Me Crazy! dedicated server:  docker compose up -d
+# The console: docker attach colormecrazy (type help; Ctrl+P then Ctrl+Q leaves it running).
+# Forward UDP 7777 on your router to this machine, then give your players its public address.
+services:
+  colormecrazy:
+    image: dogwaterstudios/colormecrazy:latest
+    container_name: colormecrazy
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    ports:
+      - "7777:7777/udp"
+    volumes:
+      - cmc-saved:/server/ColorMeCrazy/Saved
+    # Anything here wins over rules.json at every start. -NoSetup: start without the first-start questions (the console's
+    # setup asks them later). -NoUPnP: Docker's NAT keeps UPnP from reaching the router.
+    command: ["-NoSetup", "-NoUPnP", "-ServerName=My Studio"]
+    # Saving a big gallery can take longer than Docker's default 10 seconds.
+    stop_grace_period: 60s
+
+volumes:
+  cmc-saved:
