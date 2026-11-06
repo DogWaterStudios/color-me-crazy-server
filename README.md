@@ -51,6 +51,21 @@ Then run it again with the same `docker run` line. The studio lives in the volum
 - **Hardening**: the server needs no capabilities, so `--cap-drop ALL --security-opt no-new-privileges` can go on the
   run line.
 
+## The connection is encrypted
+
+Every join and the session after it are encrypted, passwords included. On its first start the server makes a signing
+key, `Server/server_key.bin` in the volume. The console prints that key's fingerprint at start and with `network`:
+`Fingerprint:   ABCD-EFGH-JKMN-PQRS`.
+
+A player's game remembers the key the first time it joins your address, and refuses the address if the key ever
+changes, like SSH. To be sure from the first join, give players the address with the fingerprint after a `#`:
+`paint.example.com:7777#ABCD-EFGH-JKMN-PQRS`.
+
+- **Keep the volume.** Recreating the container is fine: the key lives in the volume. A new volume makes a new key, and
+  every player who joined before is refused until they use the address with the new fingerprint.
+- **Never share the key.** Whoever holds it can pass for your server. Back it up with the rest of the volume.
+- **Keep the logs private.** The engine writes each join request, password included, into `Logs` in the volume.
+
 ## Options
 
 Arguments after the image name go to the server. Each one wins over the saved rules at every start.
