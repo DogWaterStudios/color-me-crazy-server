@@ -1,6 +1,8 @@
 # A Color Me Crazy! dedicated server:  docker compose up -d
 # The console: docker attach colormecrazy (type help; Ctrl+P then Ctrl+Q leaves it running).
-# Forward UDP 7777 on your router to this machine, then give your players its public address.
+# Forward UDP 7777 on your router to this machine, then give your players its public address. UDP 7778 answers server
+# queries (A2S: name, map, painters) for status tools; drop its line if nothing reads it. A second server here needs other
+# ports two apart (7779 and 7780, with -QueryPort=7780), never 7778.
 services:
   colormecrazy:
     image: dogwaterstudios/colormecrazy:latest
@@ -10,6 +12,7 @@ services:
     tty: true
     ports:
       - "7777:7777/udp"
+      - "7778:7778/udp"
     volumes:
       - cmc-saved:/server/ColorMeCrazy/Saved
     # Anything here wins over rules.json at every start. -NoSetup: start without the first-start questions (the console's

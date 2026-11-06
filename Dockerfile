@@ -30,5 +30,6 @@ WORKDIR /server
 # The studio, rules, gallery, logs: everything the server keeps (docs/dedicated-server.md, "What is in Saved/").
 VOLUME /server/ColorMeCrazy/Saved
 ENV PORT=7777
-EXPOSE 7777/udp
+# The game, and the server query (A2S) on the game port + 1.
+EXPOSE 7777/udp 7778/udp
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/server/run_server.sh"]

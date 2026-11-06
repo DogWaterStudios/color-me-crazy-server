@@ -5,7 +5,7 @@ Dog Water Studios. A server keeps a studio's gallery up for everyone: up to 64 p
 lists servers, so you give your players the address yourself.
 
 ```
-docker run -dit --name colormecrazy --restart unless-stopped -p 7777:7777/udp \
+docker run -dit --name colormecrazy --restart unless-stopped -p 7777:7777/udp -p 7778:7778/udp \
   -v cmc-saved:/server/ColorMeCrazy/Saved dogwaterstudios/colormecrazy -NoUPnP
 docker attach colormecrazy
 ```
@@ -36,6 +36,12 @@ Then run it again with the same `docker run` line. The studio lives in the volum
   `--network host` (in place of `-p`) puts the server straight on the machine's network, where it forwards the port by
   UPnP and checks it can be reached. For another outside port, map it (`-p 27015:7777/udp`) and add
   `-PublicAddress=<host>:27015`.
+- **Server queries**: UDP 7778 (the game port + 1) answers Steam's server queries (A2S_INFO, A2S_PLAYER) for status
+  tools and hosting panels: the name, map, build, painters and cap, and whether a join password is set. Painters are
+  listed by name (rude words starred) to anyone who asks; `-NoQuery` keeps them private. `-QueryPort=` picks another port, `-NoQuery` turns it off; drop `-p 7778:7778/udp` if
+  nothing reads it. There is no RCON: the console is stdin.
+- **Two servers on one host** need their own ports, two apart (`-p 7779:7779/udp -p 7780:7780/udp` with `-port=7779`), or
+  the first one's query port is the second one's game port.
 - **The console** is `docker attach colormecrazy`. Type `help` for the commands: status, rules, `set <rule> <value>`,
   `password`, `adminpassword`, `say`, `backup`, `import`, `restart`, `quit`.
 - **Claim it**: with no admin password, the first player to arrive can set the server up from the game. Set one with
@@ -87,6 +93,8 @@ Arguments after the image name go to the server. Each one wins over the saved ru
 | `-NoUPnP` | Don't ask the router to forward the port |
 | `-NoNetCheck` | Don't look up this server's public address |
 | `-PublicAddress=host[:port]` | The address players type, when it isn't this machine's |
+| `-QueryPort=` | The server query port (A2S), default the game port + 1; `0` turns it off |
+| `-NoQuery` | Answer no server queries |
 | `-FullLog` | Show the engine's whole log, not only the server's own lines |
 
 Voice chat needs no setup. The server and its players need to reach the internet (Epic Online Services).
