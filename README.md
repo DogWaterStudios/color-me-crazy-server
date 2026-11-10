@@ -39,7 +39,14 @@ Then run it again with the same `docker run` line. The studio lives in the volum
 - **Server queries**: UDP 7778 (the game port + 1) answers Steam's server queries (A2S_INFO, A2S_PLAYER) for status
   tools and hosting panels: the name, map, build, painters and cap, and whether a join password is set. Painters are
   listed by name (rude words starred) to anyone who asks; `-NoQuery` keeps them private. `-QueryPort=` picks another port, `-NoQuery` turns it off; drop `-p 7778:7778/udp` if
-  nothing reads it. There is no RCON: the console is stdin.
+  nothing reads it.
+- **RCON**: with an RCON password set (at least 8 characters: `rconpassword <word>` in the console, or `-e
+  CMC_RCON_PASSWORD=...`, which stays out of the server's log where a command-line flag would not), the server takes
+  Valve's Source RCON protocol on TCP 7777 (the game port's number; `-RconPort=` picks another), for hosting panels and RCON
+  tools. It listens on the container's loopback unless started with `-RconBind=0.0.0.0`, which publishing the port needs. It runs the console's own commands and answers with what they say; engine commands stay at the server's own
+  console. **Source RCON is unencrypted**: the password and every command cross in plain text. The image does not publish
+  the port; publish it yourself only to the host's loopback (`-p 127.0.0.1:7777:7777/tcp` with `-RconBind=0.0.0.0`) or a private network, or reach
+  it through an SSH tunnel or VPN, never from the open internet. Five wrong passwords shut an address out for ten minutes.
 - **Two servers on one host** need their own ports, two apart (`-p 7779:7779/udp -p 7780:7780/udp` with `-port=7779`), or
   the first one's query port is the second one's game port.
 - **The console** is `docker attach colormecrazy`. Type `help` for the commands: status, rules, `set <rule> <value>`,

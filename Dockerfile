@@ -30,6 +30,8 @@ WORKDIR /server
 # The studio, rules, gallery, logs: everything the server keeps (docs/dedicated-server.md, "What is in Saved/").
 VOLUME /server/ColorMeCrazy/Saved
 ENV PORT=7777
-# The game, and the server query (A2S) on the game port + 1.
+# The game, and the server query (A2S) on the game port + 1. RCON (TCP on the game port's number, only while an RCON
+# password is set) is left out on purpose: it is unencrypted, so publish it yourself, to the host's loopback or a private
+# network only: -p 127.0.0.1:7777:7777/tcp.
 EXPOSE 7777/udp 7778/udp
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/server/run_server.sh"]

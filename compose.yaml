@@ -13,6 +13,10 @@ services:
     ports:
       - "7777:7777/udp"
       - "7778:7778/udp"
+      # RCON for a hosting panel or an RCON tool: uncomment this, add "-RconBind=0.0.0.0" to command, and set the
+      # password with rconpassword in the console (or CMC_RCON_PASSWORD under environment; never -RconPassword=, which
+      # the engine writes into the log). It is unencrypted: keep it on the host's loopback (as here) or a private network.
+      # - "127.0.0.1:7777:7777/tcp"
     volumes:
       - cmc-saved:/server/ColorMeCrazy/Saved
     # Anything here wins over rules.json at every start. -NoSetup: start without the first-start questions (the console's
