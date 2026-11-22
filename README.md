@@ -111,7 +111,7 @@ Voice chat needs no setup. The server and its players need to reach the internet
 
 `Dockerfile` and `run_server.sh` are what the image is built from, around the packaged server. They are here so you can
 see what you run. The server itself is not open source. Dog Water Studios publishes the image; issues and questions go
-to [our Discord](https://dogwaterstud.io/discord).
+to [our Discord](https://discord.gg/PGk2qtamgj).
 
 ## Third-party software
 
