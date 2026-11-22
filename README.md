@@ -94,6 +94,7 @@ Arguments after the image name go to the server. Each one wins over the saved ru
 | `-ClockMultiplier=` | Multiplies every round's clock, 0.25 to 4 |
 | `-EarlyFinishBonus=` | Extra wage for finishing with clock left, 0 to 2 |
 | `-UntimedOnly`, `-AllDoorsOpen`, `-BenchFree` | Yes/no house rules; `=0` turns one off |
+| `-Versus=1` | Versus by default: every studio's rules board starts on Versus; painters can still switch it each round |
 | `-StandardRules` | Every scoring rule back to standard |
 | `-NoSetup` | Skip the first start's questions |
 | `-NoClaim` | Nobody can set the server up from the game while it has no admin password |

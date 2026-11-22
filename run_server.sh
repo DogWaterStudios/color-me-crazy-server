@@ -7,11 +7,19 @@
 # Settings, from the environment:
 #   PORT=7778 ./run_server.sh      UDP port (default 7777)
 #   SUFFIX=B ./run_server.sh       a second server on this machine: its own Saved_B folder (studio, rules, wallets)
+#   UPDATE=1 ./run_server.sh       update this folder from Steam (app 5443260, anonymous SteamCMD) before the first start and
+#                                  before every restart the console asks for (restart, import; RCON's restart too), never
+#                                  after a crash. A failed update starts the build that is here.
+#   STEAMCMD=/path/to/steamcmd.sh  where SteamCMD is, when it is not on the PATH as steamcmd
 # A clean exit (the console's quit) ends the loop; so does Ctrl+C or a kill. The console's restart and import start it again.
 # A crash waits 5 seconds and starts it again; a server that keeps crashing soon after it starts (five times in a row, each
 # within a minute of its start) waits twice as long each time, up to ten minutes, and a run that lasts a minute starts over.
+
+# One block, read whole before it runs: an update may replace this file while it runs.
+{
 cd "$(dirname "$0")" || exit 1
 PORT="${PORT:-7777}"
+STEAMCMD="${STEAMCMD:-steamcmd}"
 EXTRA=()
 SAVED=ColorMeCrazy/Saved
 if [[ -n "${SUFFIX:-}" ]]; then
@@ -23,13 +31,32 @@ fi
 # and leaves the server behind. Ctrl+C, or a stop from systemd or docker (tini -g), reaches the server; this loop stays to
 # see it out, so whatever runs it (a container's first process) does not end until the server has saved and quit.
 SERVER=ColorMeCrazy/Binaries/Linux/ColorMeCrazyServer-Linux-Shipping
-chmod +x "$SERVER" 2>/dev/null
+
+# With UPDATE set, brings this folder up to Steam's public build (players are refused on any other build). Never fatal.
+update() {
+	[[ -n "${UPDATE:-}" ]] || return 0
+	if ! command -v "$STEAMCMD" > /dev/null 2>&1; then
+		echo "[$(date '+%F %T')] UPDATE is set, but SteamCMD ($STEAMCMD) is not here: starting the build that is. Set STEAMCMD to its path."
+		return 0
+	fi
+	echo "[$(date '+%F %T')] Updating from Steam (app 5443260)."
+	"$STEAMCMD" +force_install_dir "$PWD" +login anonymous +app_update 5443260 +quit
+	local code=$?
+	if [[ $code == 0 ]]; then
+		echo "[$(date '+%F %T')] Up to date."
+	else
+		echo "[$(date '+%F %T')] The update did not finish (SteamCMD said $code): starting the build that is here."
+	fi
+}
+
 stopping=
 trap 'stopping=1' TERM INT
 quick=0 # crashes in a row that came within a minute of a start
 pause=5
+update
 
 while [[ -z $stopping ]]; do
+	chmod +x "$SERVER" 2>/dev/null
 	started=$SECONDS
 	"./$SERVER" ColorMeCrazy L_Gallery -port="$PORT" "${EXTRA[@]}" "$@"
 	code=$?
@@ -40,6 +67,7 @@ while [[ -z $stopping ]]; do
 	if [[ -f "$SAVED/Server/restart" ]]; then
 		rm -f "$SAVED/Server/restart"
 		echo "[$(date '+%F %T')] Restarting."
+		update
 		continue
 	fi
 	# 0 is a clean quit; 130 and 143 are Ctrl+C and SIGTERM.
@@ -57,3 +85,5 @@ while [[ -z $stopping ]]; do
 done
 # A stop that came while it waited to start again (the loop's test is what sees it).
 echo "Stopped before the server started again."
+exit 0
+}
